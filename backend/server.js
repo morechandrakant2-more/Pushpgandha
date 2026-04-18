@@ -88,7 +88,6 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
-
       const stmt = db.prepare(`
         INSERT INTO users (
           name, flat, sinkingFund, maintenance, municipalTax,
@@ -118,7 +117,6 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
       });
 
       fs.unlinkSync(req.file.path);
-
       res.json({ success: true, added: results.length });
     });
 });
@@ -127,7 +125,6 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
 app.get("/api/report/csv", (req, res) => {
   try {
     const rows = db.prepare("SELECT * FROM users").all();
-
     const parser = new Parser();
     const csvData = parser.parse(rows);
 
@@ -154,13 +151,18 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
 
   doc.pipe(res);
 
-  // ✅ FONT (important for Marathi)
-  const fontPath = path.join(__dirname, "fonts", "NotoSansDevanagari-Regular.ttf");
-  if (fs.existsSync(fontPath)) {
-    doc.font(fontPath);
+  // ----------- FONT SETUP -----------
+  const regularFont = path.join(__dirname, "fonts", "NotoSansDevanagari-Regular.ttf");
+  const boldFont = path.join(__dirname, "fonts", "NotoSansDevanagari-Bold.ttf");
+
+  // fallback
+  if (fs.existsSync(regularFont)) {
+    doc.font(regularFont);
+  } else {
+    doc.font("Helvetica");
   }
 
-  // ---------------- LETTERHEAD ----------------
+  // ----------- LETTERHEAD -----------
   doc.fillColor("red")
     .fontSize(16)
     .text("पुष्पगंधा को-ऑप. हाउसिंग सोसायटी लि., ठाणे.", { align: "center" });
@@ -177,25 +179,24 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
   );
 
   doc.moveDown();
-
   doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  doc.moveDown();
+
+  // ----------- META -----------
+  const today = new Date().toLocaleDateString("en-IN");
+
+  doc.fontSize(12).text(`Date: ${today}`, { align: "right" });
+  doc.moveDown();
+
+  // bold title
+  if (fs.existsSync(boldFont)) doc.font(boldFont);
+
+  doc.fontSize(16).text("Maintenance Bill", { align: "center" });
 
   doc.moveDown();
 
-  // ---------------- META ----------------
-  const today = new Date().toLocaleDateString();
-  doc
-  .fontSize(12)
-  .text(`Date: ${today}`, {
-    align: "right",
-  });
-doc.moveDown();
-
-doc
-  .font(boldFont)
-  .fontSize(16)
-  .text("Maintenance Bill", { align: "center" });
-doc.moveDown();
+  // back to normal
+  if (fs.existsSync(regularFont)) doc.font(regularFont);
 
   doc.fontSize(12);
   doc.text(`Flat: ${flat}`);
@@ -204,7 +205,7 @@ doc.moveDown();
 
   doc.moveDown();
 
-  // ---------------- FETCH DATA ----------------
+  // ----------- DATA -----------
   try {
     const rows = db.prepare(`
       SELECT * FROM users
@@ -219,9 +220,12 @@ doc.moveDown();
 
     rows.forEach((u, i) => {
       doc.moveDown();
-      doc.fontSize(14).text(`Member ${i + 1}`, { underline: true });
 
-      doc.fontSize(12);
+      if (fs.existsSync(boldFont)) doc.font(boldFont);
+      doc.fontSize(13).text(`Member ${i + 1}`, { underline: true });
+
+      if (fs.existsSync(regularFont)) doc.font(regularFont);
+
       doc.text(`Name: ${u.name}`);
       doc.text(`Sinking Fund: ${u.sinkingFund}`);
       doc.text(`Maintenance: ${u.maintenance}`);
@@ -249,6 +253,8 @@ doc.moveDown();
         Number(u.training || 0);
 
       doc.moveDown();
+
+      if (fs.existsSync(boldFont)) doc.font(boldFont);
       doc.text(`TOTAL: ${total}`);
     });
 
