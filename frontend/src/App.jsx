@@ -38,7 +38,7 @@ function App() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/report");
+      const res = await axios.get(`${API}/api/report`);
       setData(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -110,8 +110,8 @@ function App() {
   // ✅ FILTERED DATA (FIXED)
   const filteredData = data.filter((u) => {
     return (
-      (!filter.year || u.year === filter.year) &&
-      (!filter.quarter || u.quarter === filter.quarter)
+      (!filter.year || u.year == filter.year) &&
+      (!filter.quarter || u.quarter == filter.quarter)
     );
   });
 
