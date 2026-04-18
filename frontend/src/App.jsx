@@ -104,7 +104,7 @@ function App() {
 
   // ---------------- PDF ----------------
   const downloadPDF = (flat, year, quarter) => {
-    window.open(`/api/report/pdf/${flat}/${year}/${quarter}`, "_blank");
+    window.open(`${API}/api/report/pdf/${flat}/${year}/${quarter}`, "_blank");
   };
 
   // ✅ FILTERED DATA (FIXED)
