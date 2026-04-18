@@ -1,17 +1,12 @@
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
 
-const db = new sqlite3.Database("./database.db", (err) => {
-  if (err) {
-    console.error("❌ DB Error:", err);
-  } else {
-    console.log("✅ Connected to SQLite DB");
-  }
-});
+// Create / connect DB
+const db = new Database("database.db");
 
-// Create table
-db.serialize(() => {
-  db.run(
-    `CREATE TABLE IF NOT EXISTS users (
+// Create table (runs once)
+try {
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       flat TEXT,
@@ -25,13 +20,17 @@ db.serialize(() => {
       service TEXT,
       interest TEXT,
       nonOccupancy TEXT,
-      training TEXT
-    )`,
-    (err) => {
-      if (err) console.error(err);
-      else console.log("✅ Users table ready");
-    }
-  );
-});
+      training TEXT,
+      year TEXT,
+      quarter TEXT
+    )
+  `).run();
+
+  console.log("✅ Connected to SQLite DB");
+  console.log("✅ Users table ready");
+
+} catch (err) {
+  console.error("❌ DB Error:", err);
+}
 
 module.exports = db;
