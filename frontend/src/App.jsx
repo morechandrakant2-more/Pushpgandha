@@ -3,7 +3,14 @@ import axios from "axios";
 import "./App.css";
 
 function App() {
+  
+  console.log(import.meta.env.VITE_API_URL);
   const [tab, setTab] = useState("add");
+
+  const [filter, setFilter] = useState({
+    year: "",
+    quarter: ""
+  });
 
   const [form, setForm] = useState({
     name: "",
@@ -18,7 +25,9 @@ function App() {
     service: "",
     interest: "",
     nonOccupancy: "",
-    training: ""
+    training: "",
+    year: "",
+    quarter: ""
   });
 
   const [file, setFile] = useState(null);
@@ -30,9 +39,10 @@ function App() {
     try {
       setLoading(true);
       const res = await axios.get("/api/report");
-      setData(res.data);
+      setData(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch error:", err);
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -65,7 +75,9 @@ function App() {
         service: "",
         interest: "",
         nonOccupancy: "",
-        training: ""
+        training: "",
+        year: "",
+        quarter: ""
       });
 
       fetchData();
@@ -90,10 +102,18 @@ function App() {
     }
   };
 
-  // ---------------- PDF (SPECIFIC FLAT) ----------------
-  const downloadPDF = (flat) => {
-    window.open(`/api/report/pdf/${flat}`, "_blank");
+  // ---------------- PDF ----------------
+  const downloadPDF = (flat, year, quarter) => {
+    window.open(`/api/report/pdf/${flat}/${year}/${quarter}`, "_blank");
   };
+
+  // ✅ FILTERED DATA (FIXED)
+  const filteredData = data.filter((u) => {
+    return (
+      (!filter.year || u.year === filter.year) &&
+      (!filter.quarter || u.quarter === filter.quarter)
+    );
+  });
 
   return (
     <div className="container">
@@ -123,6 +143,29 @@ function App() {
         <div>
           <h2>Individual Entry</h2>
 
+          <div className="row">
+            <select
+              value={form.year}
+              onChange={(e) => setForm({ ...form, year: e.target.value })}
+            >
+              <option value="">Select Year</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+            </select>
+
+            <select
+              value={form.quarter}
+              onChange={(e) => setForm({ ...form, quarter: e.target.value })}
+            >
+              <option value="">Select Quarter</option>
+              <option value="Q1">Q1</option>
+              <option value="Q2">Q2</option>
+              <option value="Q3">Q3</option>
+              <option value="Q4">Q4</option>
+            </select>
+          </div>
+
           <input
             placeholder="Name"
             value={form.name}
@@ -135,88 +178,35 @@ function App() {
             onChange={(e) => setForm({ ...form, flat: e.target.value })}
           />
 
+          {/* Rest fields */}
           <div className="row">
-            <input
-              placeholder="Sinking Fund"
-              value={form.sinkingFund}
-              onChange={(e) => setForm({ ...form, sinkingFund: e.target.value })}
-            />
-            <input
-              placeholder="Maintenance"
-              value={form.maintenance}
-              onChange={(e) => setForm({ ...form, maintenance: e.target.value })}
-            />
+            <input placeholder="Sinking Fund" value={form.sinkingFund} onChange={(e) => setForm({ ...form, sinkingFund: e.target.value })} />
+            <input placeholder="Maintenance" value={form.maintenance} onChange={(e) => setForm({ ...form, maintenance: e.target.value })} />
           </div>
 
           <div className="row">
-            <input
-              placeholder="Municipal Tax"
-              value={form.municipalTax}
-              onChange={(e) => setForm({ ...form, municipalTax: e.target.value })}
-            />
-            <input
-              placeholder="Water"
-              value={form.water}
-              onChange={(e) => setForm({ ...form, water: e.target.value })}
-            />
+            <input placeholder="Municipal Tax" value={form.municipalTax} onChange={(e) => setForm({ ...form, municipalTax: e.target.value })} />
+            <input placeholder="Water" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} />
           </div>
 
           <div className="row">
-            <input
-              placeholder="Electricity"
-              value={form.electricity}
-              onChange={(e) => setForm({ ...form, electricity: e.target.value })}
-            />
-            <input
-              placeholder="Parking"
-              value={form.parking}
-              onChange={(e) => setForm({ ...form, parking: e.target.value })}
-            />
+            <input placeholder="Electricity" value={form.electricity} onChange={(e) => setForm({ ...form, electricity: e.target.value })} />
+            <input placeholder="Parking" value={form.parking} onChange={(e) => setForm({ ...form, parking: e.target.value })} />
           </div>
 
           <div className="row">
-            <input
-              placeholder="Insurance"
-              value={form.insurance}
-              onChange={(e) => setForm({ ...form, insurance: e.target.value })}
-            />
-            <input
-              placeholder="Service"
-              value={form.service}
-              onChange={(e) => setForm({ ...form, service: e.target.value })}
-            />
+            <input placeholder="Insurance" value={form.insurance} onChange={(e) => setForm({ ...form, insurance: e.target.value })} />
+            <input placeholder="Service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} />
           </div>
 
           <div className="row">
-            <input
-              placeholder="Interest"
-              value={form.interest}
-              onChange={(e) => setForm({ ...form, interest: e.target.value })}
-            />
-            <input
-              placeholder="Non-Occupancy"
-              value={form.nonOccupancy}
-              onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })}
-            />
+            <input placeholder="Interest" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
+            <input placeholder="Non-Occupancy" value={form.nonOccupancy} onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })} />
           </div>
 
-          <input
-            placeholder="Training"
-            value={form.training}
-            onChange={(e) => setForm({ ...form, training: e.target.value })}
-          />
+          <input placeholder="Training" value={form.training} onChange={(e) => setForm({ ...form, training: e.target.value })} />
 
           <button onClick={addUser}>Save</button>
-        </div>
-      )}
-
-      {/* ---------------- BULK UPLOAD ---------------- */}
-      {tab === "upload" && (
-        <div>
-          <h2>Bulk Upload</h2>
-
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-          <button onClick={uploadFile}>Upload CSV</button>
         </div>
       )}
 
@@ -224,6 +214,23 @@ function App() {
       {tab === "report" && (
         <div>
           <h2>Reports</h2>
+
+          <div className="row">
+            <select value={filter.year} onChange={(e) => setFilter({ ...filter, year: e.target.value })}>
+              <option value="">All Years</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+            </select>
+
+            <select value={filter.quarter} onChange={(e) => setFilter({ ...filter, quarter: e.target.value })}>
+              <option value="">All Quarters</option>
+              <option value="Q1">Q1</option>
+              <option value="Q2">Q2</option>
+              <option value="Q3">Q3</option>
+              <option value="Q4">Q4</option>
+            </select>
+          </div>
 
           {loading ? (
             <p>Loading...</p>
@@ -233,18 +240,22 @@ function App() {
                 <tr>
                   <th>Name</th>
                   <th>Flat</th>
-                  <th>PDF</th> {/* ✅ Added */}
+                  <th>Year</th>
+                  <th>Quarter</th>
+                  <th>PDF</th>
                 </tr>
               </thead>
 
               <tbody>
-                {data.length > 0 ? (
-                  data.map((u, i) => (
+                {filteredData.length > 0 ? (
+                  filteredData.map((u, i) => (
                     <tr key={i}>
                       <td>{u.name}</td>
                       <td>{u.flat}</td>
+                      <td>{u.year}</td>
+                      <td>{u.quarter}</td>
                       <td>
-                        <button onClick={() => downloadPDF(u.flat)}>
+                        <button onClick={() => downloadPDF(u.flat, u.year, u.quarter)}>
                           Download PDF
                         </button>
                       </td>
@@ -252,7 +263,7 @@ function App() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3">No data</td>
+                    <td colSpan="5">No data</td>
                   </tr>
                 )}
               </tbody>
