@@ -3,7 +3,7 @@ import axios from "axios";
 import "./App.css";
 
 function App() {
-  
+  const API = import.meta.env.VITE_API_URL;
   console.log(import.meta.env.VITE_API_URL);
   const [tab, setTab] = useState("add");
 
@@ -60,7 +60,7 @@ function App() {
     }
 
     try {
-      await axios.post("/api/users", form);
+      await axios.post(`${API}/api/users`, form);
 
       setForm({
         name: "",
