@@ -192,12 +192,9 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
 doc.moveDown();
 
 doc
+  .font(boldFont)
   .fontSize(16)
-  .font("NotoSansDevanagari-Bold") // optional if you have bold
-  .text("Maintenance Bill", {
-    align: "center",
-  });
-
+  .text("Maintenance Bill", { align: "center" });
 doc.moveDown();
 
   doc.fontSize(12);
