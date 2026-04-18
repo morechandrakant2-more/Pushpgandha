@@ -184,9 +184,23 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
 
   // ---------------- META ----------------
   const today = new Date().toLocaleDateString();
+  doc
+  .fontSize(12)
+  .text(`Date: ${today}`, {
+    align: "right",
+  });
+doc.moveDown();
+
+doc
+  .fontSize(16)
+  .font("NotoSansDevanagari-Bold") // optional if you have bold
+  .text("Maintenance Bill", {
+    align: "center",
+  });
+
+doc.moveDown();
 
   doc.fontSize(12);
-  doc.text(`Date: ${today}`);
   doc.text(`Flat: ${flat}`);
   doc.text(`Year: ${year}`);
   doc.text(`Quarter: ${quarter}`);
