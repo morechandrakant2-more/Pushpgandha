@@ -182,25 +182,78 @@ function App() {
 
       {/* ---------------- ADD ---------------- */}
       {tab === "add" && (
-        <div>
-          <h2>Individual Entry</h2>
+  <div>
+    <h2>Individual Entry</h2>
 
-          <input
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
+    <div className="row">
+      <select
+        value={form.year}
+        onChange={(e) => setForm({ ...form, year: e.target.value })}
+      >
+        <option value="">Select Year</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+      </select>
 
-          <input
-            placeholder="Flat No"
-            value={form.flat}
-            onChange={(e) => setForm({ ...form, flat: e.target.value })}
-          />
+      <select
+        value={form.quarter}
+        onChange={(e) => setForm({ ...form, quarter: e.target.value })}
+      >
+        <option value="">Select Quarter</option>
+        <option value="Q1">Q1</option>
+        <option value="Q2">Q2</option>
+        <option value="Q3">Q3</option>
+        <option value="Q4">Q4</option>
+      </select>
+    </div>
 
-          <button onClick={addUser}>Save</button>
-        </div>
-      )}
+    <input
+      placeholder="Name"
+      value={form.name}
+      onChange={(e) => setForm({ ...form, name: e.target.value })}
+    />
 
+    <input
+      placeholder="Flat No"
+      value={form.flat}
+      onChange={(e) => setForm({ ...form, flat: e.target.value })}
+    />
+
+    <div className="row">
+      <input placeholder="Sinking Fund" value={form.sinkingFund} onChange={(e) => setForm({ ...form, sinkingFund: e.target.value })} />
+      <input placeholder="Maintenance" value={form.maintenance} onChange={(e) => setForm({ ...form, maintenance: e.target.value })} />
+    </div>
+
+    <div className="row">
+      <input placeholder="Municipal Tax" value={form.municipalTax} onChange={(e) => setForm({ ...form, municipalTax: e.target.value })} />
+      <input placeholder="Water" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} />
+    </div>
+
+    <div className="row">
+      <input placeholder="Electricity" value={form.electricity} onChange={(e) => setForm({ ...form, electricity: e.target.value })} />
+      <input placeholder="Parking" value={form.parking} onChange={(e) => setForm({ ...form, parking: e.target.value })} />
+    </div>
+
+    <div className="row">
+      <input placeholder="Insurance" value={form.insurance} onChange={(e) => setForm({ ...form, insurance: e.target.value })} />
+      <input placeholder="Service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} />
+    </div>
+
+    <div className="row">
+      <input placeholder="Interest" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
+      <input placeholder="Non-Occupancy" value={form.nonOccupancy} onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })} />
+    </div>
+
+    <input
+      placeholder="Training"
+      value={form.training}
+      onChange={(e) => setForm({ ...form, training: e.target.value })}
+    />
+
+    <button onClick={addUser}>Save</button>
+  </div>
+)}
       {/* ---------------- REPORT ---------------- */}
       {tab === "report" && (
         <div>
