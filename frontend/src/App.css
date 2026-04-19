@@ -68,7 +68,7 @@ select {
   border-radius: 6px;
   font-size: 14px;
   box-sizing: border-box;
-  background: white;
+  background: black;
 
   /* 🔥 IMPORTANT: restore dropdown arrow */
   appearance: auto;
