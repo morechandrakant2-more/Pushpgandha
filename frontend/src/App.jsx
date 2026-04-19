@@ -308,6 +308,33 @@ function App() {
         <div>
           <h2>Reports</h2>
 
+          <div className="row">
+      <select
+        value={filter.year}
+        onChange={(e) =>
+          setFilter({ ...filter, year: e.target.value })
+        }
+      >
+        <option value="">All Years</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+      </select>
+
+      <select
+        value={filter.quarter}
+        onChange={(e) =>
+          setFilter({ ...filter, quarter: e.target.value })
+        }
+      >
+        <option value="">All Quarters</option>
+        <option value="Q1">Q1</option>
+        <option value="Q2">Q2</option>
+        <option value="Q3">Q3</option>
+        <option value="Q4">Q4</option>
+      </select>
+    </div>
+
           {loading ? (
             <p>Loading...</p>
           ) : (
