@@ -174,6 +174,7 @@ function App() {
         <button onClick={() => setTab("expenses")} className={tab === "expenses" ? "active" : ""}>
           Expenses
         </button>
+        
 
         <button onClick={() => setTab("report")} className={tab === "report" ? "active" : ""}>
           Reports
@@ -303,6 +304,14 @@ function App() {
       {tab === "expenses" && (
         <div>
           <h2>Expenses</h2>
+          <p>Coming soon...</p>
+        </div>
+      )}
+
+      {/* ---------------- Bulk Entry ---------------- */}
+      {tab === "expenses" && (
+        <div>
+          <h2>Bulk Entry</h2>
           <p>Coming soon...</p>
         </div>
       )}
