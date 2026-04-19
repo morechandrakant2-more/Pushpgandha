@@ -10,6 +10,37 @@ const path = require("path");
 const app = express();
 const db = require("./db/database");
 
+//-------------------LOGIN------------------
+
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = db
+      .prepare("SELECT * FROM admin WHERE user_name = ?")
+      .get(username);
+
+    console.log("DB user:", user);           // 🔍 debug
+    console.log("Entered:", username, password); // 🔍 debug
+
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // ✅ Plain text match
+    if (user.user_pass !== password) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    // ✅ Success
+    res.json({ token: "my-secret-token" });
+
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // ---------------- MIDDLEWARE ----------------
 app.use(cors({ origin: "*" }));
 app.use(express.json());
