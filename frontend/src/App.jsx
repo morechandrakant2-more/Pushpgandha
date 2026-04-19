@@ -69,56 +69,73 @@ function App() {
 
   // ---------------- ADD USER ----------------
   const addUser = async () => {
+  // ---------------- BASIC VALIDATION ----------------
   if (!form.name || !form.flat) {
-    alert("Enter name and flat");
+    alert("Please enter Name and Flat");
     return;
   }
 
-  // 🔥 Numeric fields list
-  const numericFields = [
-    "sinkingFund",
-    "maintenance",
-    "municipalTax",
-    "water",
-    "electricity",
-    "parking",
-    "insurance",
-    "service",
-    "interest",
-    "nonOccupancy",
-    "training"
-  ];
+  // ---------------- FIELD LABELS (for UI messages) ----------------
+  const fieldLabels = {
+    sinkingFund: "Sinking Fund",
+    maintenance: "Maintenance",
+    municipalTax: "Municipal Tax",
+    water: "Water",
+    electricity: "Electricity",
+    parking: "Parking",
+    insurance: "Insurance",
+    service: "Service",
+    interest: "Interest",
+    nonOccupancy: "Non-Occupancy",
+    training: "Training"
+  };
 
-  // ✅ Copy form
+  const numericFields = Object.keys(fieldLabels);
+
   let updatedForm = { ...form };
 
-  // 🔥 Validation loop
-  for (let field of numericFields) {
-    let value = updatedForm[field];
+  let emptyFields = [];
+  let invalidFields = [];
 
-    // If empty → ask user
+  // ---------------- VALIDATION LOOP ----------------
+  numericFields.forEach((field) => {
+    const value = updatedForm[field];
+
+    // Check empty
     if (value === "" || value === null || value === undefined) {
-      const confirmZero = window.confirm(
-        `${field} is empty.\n\nPress OK to set it to 0\nPress Cancel to enter value`
-      );
-
-      if (confirmZero) {
-        updatedForm[field] = 0;
-      } else {
-        return; // stop saving
-      }
+      emptyFields.push(fieldLabels[field]);
     }
 
-    // If not a number → block
-    if (isNaN(updatedForm[field])) {
-      alert(`${field} must be a number`);
-      return;
+    // Check non-number (only if not empty)
+    else if (isNaN(value)) {
+      invalidFields.push(fieldLabels[field]);
     }
 
-    // Convert to number (important)
-    updatedForm[field] = Number(updatedForm[field]);
+    // Convert to number
+    else {
+      updatedForm[field] = Number(value);
+    }
+  });
+
+  // ---------------- HANDLE ERRORS ----------------
+
+  // ❌ Empty fields
+  if (emptyFields.length > 0) {
+    alert(
+      `Please enter values for:\n\n${emptyFields.join(", ")}\n\nIf not applicable, enter 0.`
+    );
+    return;
   }
 
+  // ❌ Invalid numbers
+  if (invalidFields.length > 0) {
+    alert(
+      `These fields must be numbers:\n\n${invalidFields.join(", ")}`
+    );
+    return;
+  }
+
+  // ---------------- API CALL ----------------
   try {
     await axios.post(`${API}/api/users`, updatedForm, {
       headers: {
@@ -254,18 +271,27 @@ function App() {
         <option value="Q3">Q3</option>
         <option value="Q4">Q4</option>
       </select>
+
+      {/* FLAT NUMBER */}
+  <select
+    value={form.flat}
+    onChange={(e) => setForm({ ...form, flat: e.target.value })}
+  >
+    <option value="">Select Flat</option>
+
+    {[...Array(45)].map((_, i) => (
+      <option key={i + 1} value={i + 1}>
+        {i + 1}
+      </option>
+    ))}
+
+  </select>
     </div>
 
     <input
       placeholder="Name"
       value={form.name}
       onChange={(e) => setForm({ ...form, name: e.target.value })}
-    />
-
-    <input
-      placeholder="Flat No"
-      value={form.flat}
-      onChange={(e) => setForm({ ...form, flat: e.target.value })}
     />
 
     <div className="row">
