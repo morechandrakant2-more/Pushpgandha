@@ -12,7 +12,7 @@ function App() {
     !!localStorage.getItem("token")
   );
 
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   const [tab, setTab] = useState("add");
 
@@ -147,7 +147,9 @@ function App() {
 
   // ✅ ✅ THIS WAS MISSING IN YOUR CODE
   if (!isLoggedIn) {
-    return <Login setIsLoggedIn={setIsLoggedIn} />;
+    return <Login setIsLoggedIn={setIsLoggedIn}
+                  setToken={setToken}
+           />;
   }
 
   // ---------------- MAIN APP ----------------
