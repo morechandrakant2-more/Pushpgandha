@@ -300,6 +300,14 @@ function App() {
         </div>
       )}
 
+      {/* ---------------- Bulk Entry ---------------- */}
+      {tab === "upload" && (
+        <div>
+          <h2>Bulk Entry</h2>
+          <p>Coming soon...</p>
+        </div>
+      )}
+
       {/* ---------------- EXPENSES ---------------- */}
       {tab === "expenses" && (
         <div>
@@ -307,16 +315,8 @@ function App() {
           <p>Coming soon...</p>
         </div>
       )}
-
-      {/* ---------------- Bulk Entry ---------------- */}
-      {tab === "expenses" && (
-        <div>
-          <h2>Bulk Entry</h2>
-          <p>Coming soon...</p>
-        </div>
-      )}
-
     </div>
+
   );
 }
 
