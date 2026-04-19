@@ -69,42 +69,89 @@ function App() {
 
   // ---------------- ADD USER ----------------
   const addUser = async () => {
-    if (!form.name || !form.flat) {
-      alert("Enter name and flat");
+  if (!form.name || !form.flat) {
+    alert("Enter name and flat");
+    return;
+  }
+
+  // 🔥 Numeric fields list
+  const numericFields = [
+    "sinkingFund",
+    "maintenance",
+    "municipalTax",
+    "water",
+    "electricity",
+    "parking",
+    "insurance",
+    "service",
+    "interest",
+    "nonOccupancy",
+    "training"
+  ];
+
+  // ✅ Copy form
+  let updatedForm = { ...form };
+
+  // 🔥 Validation loop
+  for (let field of numericFields) {
+    let value = updatedForm[field];
+
+    // If empty → ask user
+    if (value === "" || value === null || value === undefined) {
+      const confirmZero = window.confirm(
+        `${field} is empty.\n\nPress OK to set it to 0\nPress Cancel to enter value`
+      );
+
+      if (confirmZero) {
+        updatedForm[field] = 0;
+      } else {
+        return; // stop saving
+      }
+    }
+
+    // If not a number → block
+    if (isNaN(updatedForm[field])) {
+      alert(`${field} must be a number`);
       return;
     }
 
-    try {
-      await axios.post(`${API}/api/users`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    // Convert to number (important)
+    updatedForm[field] = Number(updatedForm[field]);
+  }
 
-      setForm({
-        name: "",
-        flat: "",
-        sinkingFund: "",
-        maintenance: "",
-        municipalTax: "",
-        water: "",
-        electricity: "",
-        parking: "",
-        insurance: "",
-        service: "",
-        interest: "",
-        nonOccupancy: "",
-        training: "",
-        year: "",
-        quarter: ""
-      });
+  try {
+    await axios.post(`${API}/api/users`, updatedForm, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      fetchData();
-    } catch (err) {
-      console.error("Add user error:", err);
-    }
-  };
+    // ✅ Reset form
+    setForm({
+      name: "",
+      flat: "",
+      sinkingFund: "",
+      maintenance: "",
+      municipalTax: "",
+      water: "",
+      electricity: "",
+      parking: "",
+      insurance: "",
+      service: "",
+      interest: "",
+      nonOccupancy: "",
+      training: "",
+      year: "",
+      quarter: ""
+    });
 
+    fetchData();
+
+  } catch (err) {
+    console.error("Add user error:", err);
+    alert("Failed to save data");
+  }
+};
   // ---------------- BULK UPLOAD ----------------
   const uploadFile = async () => {
     if (!file) return alert("Select a file");
@@ -222,31 +269,32 @@ function App() {
     />
 
     <div className="row">
-      <input placeholder="Sinking Fund" value={form.sinkingFund} onChange={(e) => setForm({ ...form, sinkingFund: e.target.value })} />
-      <input placeholder="Maintenance" value={form.maintenance} onChange={(e) => setForm({ ...form, maintenance: e.target.value })} />
+      <input type="number" placeholder="Sinking Fund" value={form.sinkingFund} onChange={(e) => setForm({ ...form, sinkingFund: e.target.value })} />
+      <input type="number" placeholder="Maintenance" value={form.maintenance} onChange={(e) => setForm({ ...form, maintenance: e.target.value })} />
     </div>
 
     <div className="row">
-      <input placeholder="Municipal Tax" value={form.municipalTax} onChange={(e) => setForm({ ...form, municipalTax: e.target.value })} />
-      <input placeholder="Water" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} />
+      <input type="number" placeholder="Municipal Tax" value={form.municipalTax} onChange={(e) => setForm({ ...form, municipalTax: e.target.value })} />
+      <input type="number" placeholder="Water" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} />
     </div>
 
     <div className="row">
-      <input placeholder="Electricity" value={form.electricity} onChange={(e) => setForm({ ...form, electricity: e.target.value })} />
-      <input placeholder="Parking" value={form.parking} onChange={(e) => setForm({ ...form, parking: e.target.value })} />
+      <input type="number" placeholder="Electricity" value={form.electricity} onChange={(e) => setForm({ ...form, electricity: e.target.value })} />
+      <input type="number" placeholder="Parking" value={form.parking} onChange={(e) => setForm({ ...form, parking: e.target.value })} />
     </div>
 
     <div className="row">
-      <input placeholder="Insurance" value={form.insurance} onChange={(e) => setForm({ ...form, insurance: e.target.value })} />
-      <input placeholder="Service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} />
+      <input type="number" placeholder="Insurance" value={form.insurance} onChange={(e) => setForm({ ...form, insurance: e.target.value })} />
+      <input type="number" placeholder="Service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} />
     </div>
 
     <div className="row">
-      <input placeholder="Interest" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
-      <input placeholder="Non-Occupancy" value={form.nonOccupancy} onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })} />
+      <input type="number" placeholder="Interest" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
+      <input type="number" placeholder="Non-Occupancy" value={form.nonOccupancy} onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })} />
     </div>
 
     <input
+      type="number"
       placeholder="Training"
       value={form.training}
       onChange={(e) => setForm({ ...form, training: e.target.value })}
