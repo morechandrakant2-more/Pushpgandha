@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
-import Login from "./Login"
+import Login from "./Login";
 
 function App() {
+
+  const API = import.meta.env.VITE_API_URL;
+
+  // ✅ LOGIN STATE
   const [isLoggedIn, setIsLoggedIn] = useState(
     !!localStorage.getItem("token")
   );
 
-  const API = import.meta.env.VITE_API_URL;
-  console.log(import.meta.env.VITE_API_URL);
   const [tab, setTab] = useState("add");
 
   const [filter, setFilter] = useState({
@@ -39,11 +41,20 @@ function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ✅ GET TOKEN
+  const token = localStorage.getItem("token");
+
   // ---------------- FETCH DATA ----------------
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API}/api/report`);
+
+      const res = await axios.get(`${API}/api/report`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setData(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -54,8 +65,8 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isLoggedIn) fetchData();
+  }, [isLoggedIn]);
 
   // ---------------- ADD USER ----------------
   const addUser = async () => {
@@ -65,7 +76,11 @@ function App() {
     }
 
     try {
-      await axios.post(`${API}/api/users`, form);
+      await axios.post(`${API}/api/users`, form, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setForm({
         name: "",
@@ -99,7 +114,12 @@ function App() {
     formData.append("file", file);
 
     try {
-      await axios.post("/api/upload", formData);
+      await axios.post(`${API}/api/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setFile(null);
       fetchData();
     } catch (err) {
@@ -112,7 +132,13 @@ function App() {
     window.open(`${API}/api/report/pdf/${flat}/${year}/${quarter}`, "_blank");
   };
 
-  // ✅ FILTERED DATA (FIXED)
+  // ---------------- LOGOUT ----------------
+  const logout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+  };
+
+  // ---------------- FILTER ----------------
   const filteredData = data.filter((u) => {
     return (
       (!filter.year || u.year == filter.year) &&
@@ -120,9 +146,19 @@ function App() {
     );
   });
 
+  // ✅ SHOW LOGIN FIRST
+  if (!isLoggedIn) {
+    return <Login setIsLoggedIn={setIsLoggedIn} />;
+  }
+
+  // ---------------- MAIN APP ----------------
   return (
     <div className="container">
-      <h1>Society Management</h1>
+
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h1>Society Management</h1>
+        <button onClick={logout}>Logout</button>
+      </div>
 
       {/* Tabs */}
       <div className="tabs">
@@ -148,29 +184,6 @@ function App() {
         <div>
           <h2>Individual Entry</h2>
 
-          <div className="row">
-            <select
-              value={form.year}
-              onChange={(e) => setForm({ ...form, year: e.target.value })}
-            >
-              <option value="">Select Year</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-              <option value="2028">2028</option>
-            </select>
-
-            <select
-              value={form.quarter}
-              onChange={(e) => setForm({ ...form, quarter: e.target.value })}
-            >
-              <option value="">Select Quarter</option>
-              <option value="Q1">Q1</option>
-              <option value="Q2">Q2</option>
-              <option value="Q3">Q3</option>
-              <option value="Q4">Q4</option>
-            </select>
-          </div>
-
           <input
             placeholder="Name"
             value={form.name}
@@ -183,34 +196,6 @@ function App() {
             onChange={(e) => setForm({ ...form, flat: e.target.value })}
           />
 
-          {/* Rest fields */}
-          <div className="row">
-            <input placeholder="Sinking Fund" value={form.sinkingFund} onChange={(e) => setForm({ ...form, sinkingFund: e.target.value })} />
-            <input placeholder="Maintenance" value={form.maintenance} onChange={(e) => setForm({ ...form, maintenance: e.target.value })} />
-          </div>
-
-          <div className="row">
-            <input placeholder="Municipal Tax" value={form.municipalTax} onChange={(e) => setForm({ ...form, municipalTax: e.target.value })} />
-            <input placeholder="Water" value={form.water} onChange={(e) => setForm({ ...form, water: e.target.value })} />
-          </div>
-
-          <div className="row">
-            <input placeholder="Electricity" value={form.electricity} onChange={(e) => setForm({ ...form, electricity: e.target.value })} />
-            <input placeholder="Parking" value={form.parking} onChange={(e) => setForm({ ...form, parking: e.target.value })} />
-          </div>
-
-          <div className="row">
-            <input placeholder="Insurance" value={form.insurance} onChange={(e) => setForm({ ...form, insurance: e.target.value })} />
-            <input placeholder="Service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} />
-          </div>
-
-          <div className="row">
-            <input placeholder="Interest" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
-            <input placeholder="Non-Occupancy" value={form.nonOccupancy} onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })} />
-          </div>
-
-          <input placeholder="Training" value={form.training} onChange={(e) => setForm({ ...form, training: e.target.value })} />
-
           <button onClick={addUser}>Save</button>
         </div>
       )}
@@ -219,23 +204,6 @@ function App() {
       {tab === "report" && (
         <div>
           <h2>Reports</h2>
-
-          <div className="row">
-            <select value={filter.year} onChange={(e) => setFilter({ ...filter, year: e.target.value })}>
-              <option value="">All Years</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-              <option value="2028">2028</option>
-            </select>
-
-            <select value={filter.quarter} onChange={(e) => setFilter({ ...filter, quarter: e.target.value })}>
-              <option value="">All Quarters</option>
-              <option value="Q1">Q1</option>
-              <option value="Q2">Q2</option>
-              <option value="Q3">Q3</option>
-              <option value="Q4">Q4</option>
-            </select>
-          </div>
 
           {loading ? (
             <p>Loading...</p>
@@ -261,7 +229,7 @@ function App() {
                       <td>{u.quarter}</td>
                       <td>
                         <button onClick={() => downloadPDF(u.flat, u.year, u.quarter)}>
-                          Download PDF
+                          PDF
                         </button>
                       </td>
                     </tr>
@@ -277,13 +245,6 @@ function App() {
         </div>
       )}
 
-      {/* ---------------- EXPENSES ---------------- */}
-      {tab === "expenses" && (
-        <div>
-          <h2>Expenses</h2>
-          <p>Coming soon...</p>
-        </div>
-      )}
     </div>
   );
 }
