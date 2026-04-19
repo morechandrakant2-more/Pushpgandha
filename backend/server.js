@@ -11,6 +11,8 @@ const app = express();
 const db = require("./db/database");
 
 //-------------------LOGIN------------------
+app.use(cors());
+app.use(express.json());
 
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
