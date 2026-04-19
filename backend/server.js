@@ -255,7 +255,7 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
       doc.moveDown();
 
       if (fs.existsSync(boldFont)) doc.font(boldFont);
-      doc.fontSize(13).text(`Member ${i + 1}`, { underline: true });
+      //doc.fontSize(13).text(`Member ${i + 1}`, { underline: true });
 
       if (fs.existsSync(regularFont)) doc.font(regularFont);
 
