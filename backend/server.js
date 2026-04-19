@@ -10,39 +10,6 @@ const path = require("path");
 const app = express();
 const db = require("./db/database");
 
-//-------------------LOGIN------------------
-app.use(cors());
-app.use(express.json());
-
-app.post("/api/login", (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    const user = db
-      .prepare("SELECT * FROM admin WHERE user_name = ?")
-      .get(username);
-
-    console.log("DB user:", user);           // 🔍 debug
-    console.log("Entered:", username, password); // 🔍 debug
-
-    if (!user) {
-      return res.status(401).json({ error: "User not found" });
-    }
-
-    // ✅ Plain text match
-    if (user.user_pass !== password) {
-      return res.status(401).json({ error: "Invalid password" });
-    }
-
-    // ✅ Success
-    res.json({ token: "my-secret-token" });
-
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
 // ---------------- MIDDLEWARE ----------------
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -51,6 +18,35 @@ app.use(express.json());
 app.use((req, res, next) => {
   console.log(`➡️ ${req.method} ${req.url}`);
   next();
+});
+
+// ---------------- LOGIN ----------------
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body || {}; // ✅ FIX
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username & password required" });
+  }
+
+  try {
+    const user = db
+      .prepare("SELECT * FROM admin WHERE user_name = ?")
+      .get(username);
+
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    if (user.user_pass !== password) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    res.json({ token: "my-secret-token" });
+
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // ---------------- ADD USER ----------------
@@ -66,8 +62,9 @@ app.post("/api/users", (req, res) => {
       INSERT INTO users (
         name, flat, sinkingFund, maintenance, municipalTax,
         water, electricity, parking, insurance, service,
-        interest, nonOccupancy, training, year, quarter
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        interest, nonOccupancy, training, year, quarter,
+        adjustments, adjustmentRemark, penaltyCharges
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
@@ -85,7 +82,10 @@ app.post("/api/users", (req, res) => {
       u.nonOccupancy,
       u.training,
       u.year,
-      u.quarter
+      u.quarter,
+      u.adjustments,          // ✅ NEW
+      u.adjustmentRemark,    // ✅ NEW
+      u.penaltyCharges        // ✅ NEW
     );
 
     res.json({ success: true, id: result.lastInsertRowid });
@@ -125,8 +125,9 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
         INSERT INTO users (
           name, flat, sinkingFund, maintenance, municipalTax,
           water, electricity, parking, insurance, service,
-          interest, nonOccupancy, training, year, quarter
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          interest, nonOccupancy, training, year, quarter,
+          adjustments, adjustmentRemark, penaltyCharges
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       results.forEach((u) => {
@@ -145,7 +146,10 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
           u.nonOccupancy,
           u.training,
           u.year || "",
-          u.quarter || ""
+          u.quarter || "",
+          u.adjustments || 0,
+          u.adjustmentRemark || "",
+          u.penaltyCharges || 0
         );
       });
 
@@ -184,61 +188,16 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
 
   doc.pipe(res);
 
-  // ----------- FONT SETUP -----------
-  const regularFont = path.join(__dirname, "fonts", "NotoSansDevanagari-Regular.ttf");
-  const boldFont = path.join(__dirname, "fonts", "NotoSansDevanagari-Bold.ttf");
-
-  // fallback
-  if (fs.existsSync(regularFont)) {
-    doc.font(regularFont);
-  } else {
-    doc.font("Helvetica");
-  }
-
-  // ----------- LETTERHEAD -----------
-  doc.fillColor("red")
-    .fontSize(16)
-    .text("पुष्पगंधा को-ऑप. हाउसिंग सोसायटी लि., ठाणे.", { align: "center" });
-
-  doc.fillColor("black")
-    .fontSize(10)
-    .text("( रजि. नं. टी. एन. एच. एस. जी. टी. सी. १९४५/१९६६ - ६७ )", { align: "center" });
-
-  doc.moveDown(0.5);
-
-  doc.text(
-    "एफ - २, सेक्टर - २, श्रीनगर पोलिस चौकी समोर, श्रीनगर, वागळे इस्टेट, ठाणे - ४०० ६०४.",
-    { align: "center" }
-  );
-
-  doc.moveDown();
-  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-  doc.moveDown();
-
-  // ----------- META -----------
-  const today = new Date().toLocaleDateString("en-IN");
-
-  doc.fontSize(12).text(`Date: ${today}`, { align: "right" });
-  doc.moveDown();
-
-  // bold title
-  if (fs.existsSync(boldFont)) doc.font(boldFont);
-
+  // ----------- HEADER -----------
   doc.fontSize(16).text("Maintenance Bill", { align: "center" });
-
   doc.moveDown();
-
-  // back to normal
-  if (fs.existsSync(regularFont)) doc.font(regularFont);
 
   doc.fontSize(12);
   doc.text(`Flat: ${flat}`);
   doc.text(`Year: ${year}`);
   doc.text(`Quarter: ${quarter}`);
-
   doc.moveDown();
 
-  // ----------- DATA -----------
   try {
     const rows = db.prepare(`
       SELECT * FROM users
@@ -251,13 +210,8 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
       return;
     }
 
-    rows.forEach((u, i) => {
+    rows.forEach((u) => {
       doc.moveDown();
-
-      if (fs.existsSync(boldFont)) doc.font(boldFont);
-      //doc.fontSize(13).text(`Member ${i + 1}`, { underline: true });
-
-      if (fs.existsSync(regularFont)) doc.font(regularFont);
 
       doc.text(`Name: ${u.name}`);
       doc.text(`Sinking Fund: ${u.sinkingFund}`);
@@ -272,6 +226,11 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
       doc.text(`Non-Occupancy: ${u.nonOccupancy}`);
       doc.text(`Training: ${u.training}`);
 
+      // ✅ NEW FIELDS IN PDF
+      doc.text(`Adjustments: ${u.adjustments}`);
+      doc.text(`Adjustment Remark: ${u.adjustmentRemark}`);
+      doc.text(`Penalty Charges: ${u.penaltyCharges}`);
+
       const total =
         Number(u.sinkingFund || 0) +
         Number(u.maintenance || 0) +
@@ -283,12 +242,12 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
         Number(u.service || 0) +
         Number(u.interest || 0) +
         Number(u.nonOccupancy || 0) +
-        Number(u.training || 0);
+        Number(u.training || 0) +
+        Number(u.adjustments || 0) +
+        Number(u.penaltyCharges || 0);
 
       doc.moveDown();
-
-      if (fs.existsSync(boldFont)) doc.font(boldFont);
-      doc.text(`TOTAL: ${total}`);
+      doc.fontSize(13).text(`TOTAL: ${total}`);
     });
 
     doc.end();

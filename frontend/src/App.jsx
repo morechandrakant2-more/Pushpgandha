@@ -36,7 +36,11 @@ function App() {
     nonOccupancy: "",
     training: "",
     year: "",
-    quarter: ""
+    quarter: "",
+    adjustments: "",
+    adjustmentRemark: "",
+    penaltyCharges: ""
+
   });
 
   const [file, setFile] = useState(null);
@@ -85,9 +89,11 @@ function App() {
     parking: "Parking",
     insurance: "Insurance",
     service: "Service",
-    interest: "Interest",
+    interest: "Interest on Default Dues",
     nonOccupancy: "Non-Occupancy",
-    training: "Training"
+    training: "Training",
+    adjustments: "Adjustments",
+    penaltyCharges: "Penalty Charges"
   };
 
   const numericFields = Object.keys(fieldLabels);
@@ -159,7 +165,10 @@ function App() {
       nonOccupancy: "",
       training: "",
       year: "",
-      quarter: ""
+      quarter: "",
+      adjustments: "",
+      adjustmentRemark: "",
+      penaltyCharges: ""
     });
 
     fetchData();
@@ -248,8 +257,7 @@ function App() {
       {/* ---------------- ADD ---------------- */}
       {tab === "add" && (
   <div>
-    <h2>Individual Entry</h2>
-
+    
     <div className="row">
       <select
         value={form.year}
@@ -315,16 +323,20 @@ function App() {
     </div>
 
     <div className="row">
-      <input type="number" placeholder="Interest" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
+      <input type="number" placeholder="Interest on default dues" value={form.interest} onChange={(e) => setForm({ ...form, interest: e.target.value })} />
       <input type="number" placeholder="Non-Occupancy" value={form.nonOccupancy} onChange={(e) => setForm({ ...form, nonOccupancy: e.target.value })} />
     </div>
+    
+    <div className="row">
+      <input type="number" placeholder="Training" value={form.training} onChange={(e) => setForm({ ...form, training: e.target.value })} />
+      <input type="number" placeholder="Penalty Charges" value={form.penaltyCharges} onChange={(e) => setForm({ ...form, penaltyCharges: e.target.value })} />
+    </div>
 
-    <input
-      type="number"
-      placeholder="Training"
-      value={form.training}
-      onChange={(e) => setForm({ ...form, training: e.target.value })}
-    />
+    <div className="row">
+    <input placeholder="Remark for Adjustments" value={form.adjustmentRemark} onChange={(e) => setForm({ ...form, adjustmentRemark: e.target.value })} />
+    <input type="number" placeholder="Adjustments" value={form.adjustments} onChange={(e) => setForm({ ...form, adjustments: e.target.value })} />
+    </div>
+
 
     <button onClick={addUser}>Save</button>
   </div>
@@ -332,8 +344,6 @@ function App() {
       {/* ---------------- REPORT ---------------- */}
       {tab === "report" && (
         <div>
-          <h2>Reports</h2>
-
           <div className="row">
       <select
         value={filter.year}
@@ -404,7 +414,6 @@ function App() {
       {/* ---------------- Bulk Entry ---------------- */}
       {tab === "upload" && (
         <div>
-          <h2>Bulk Entry</h2>
           <p>Coming soon...</p>
         </div>
       )}
@@ -412,7 +421,6 @@ function App() {
       {/* ---------------- EXPENSES ---------------- */}
       {tab === "expenses" && (
         <div>
-          <h2>Expenses</h2>
           <p>Coming soon...</p>
         </div>
       )}
