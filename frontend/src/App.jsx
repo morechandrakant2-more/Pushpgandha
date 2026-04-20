@@ -96,7 +96,9 @@ function App() {
     penaltyCharges: "Penalty Charges"
   };
 
-  const numericFields = Object.keys(fieldLabels);
+  const numericFields = Object.keys(fieldLabels).filter(
+  (f) => f !== "adjustmentRemark"
+);
 
   let updatedForm = { ...form };
 

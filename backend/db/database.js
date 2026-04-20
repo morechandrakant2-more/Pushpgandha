@@ -22,7 +22,10 @@ try {
       nonOccupancy TEXT,
       training TEXT,
       year TEXT,
-      quarter TEXT
+      quarter TEXT,
+      adjustmentRemark VARCHAR(255),
+      adjustments DECIMAL(10,2),
+      penaltyCharges DECIMAL(10,2)
     )
   `).run();
 

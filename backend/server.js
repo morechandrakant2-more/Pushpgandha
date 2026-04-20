@@ -11,18 +11,33 @@ const app = express();
 const db = require("./db/database");
 
 // ---------------- MIDDLEWARE ----------------
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
-// ---------------- DEBUG ----------------
+// ✅ IMPORTANT (no "*", no "/*")
+app.options("/", cors());
+
+// ✅ HANDLE PREFLIGHT (VERY IMPORTANT)
 app.use((req, res, next) => {
-  console.log(`➡️ ${req.method} ${req.url}`);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
   next();
 });
-
 // ---------------- LOGIN ----------------
 app.post("/api/login", (req, res) => {
-  const { username, password } = req.body || {}; // ✅ FIX
+  const { username, password } = req.body || {};
 
   if (!username || !password) {
     return res.status(400).json({ error: "Username & password required" });
@@ -83,9 +98,9 @@ app.post("/api/users", (req, res) => {
       u.training,
       u.year,
       u.quarter,
-      u.adjustments,          // ✅ NEW
-      u.adjustmentRemark,    // ✅ NEW
-      u.penaltyCharges        // ✅ NEW
+      u.adjustments,
+      u.adjustmentRemark,
+      u.penaltyCharges
     );
 
     res.json({ success: true, id: result.lastInsertRowid });
@@ -188,9 +203,44 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
 
   doc.pipe(res);
 
-  // ----------- HEADER -----------
-  doc.fontSize(16).text("Maintenance Bill", { align: "center" });
+  // ✅ FONT SETUP (REQUIRED FOR MARATHI)
+  const regularFont = path.join(__dirname, "fonts", "NotoSansDevanagari-Regular.ttf");
+  const boldFont = path.join(__dirname, "fonts", "NotoSansDevanagari-Bold.ttf");
+
+  if (fs.existsSync(regularFont)) {
+    doc.font(regularFont);
+  } else {
+    doc.font("Helvetica"); // fallback
+  }
+
+  // ----------- LETTERHEAD -----------
+  doc.fillColor("red")
+    .fontSize(16)
+    .text("पुष्पगंधा को-ऑप. हाउसिंग सोसायटी लि., ठाणे.", { align: "center" });
+
+  doc.fillColor("black")
+    .fontSize(10)
+    .text("( रजि. नं. टी. एन. एच. एस. जी. टी. सी. १९४५/१९६६ - ६७ )", { align: "center" });
+
+  doc.moveDown(0.5);
+
+  doc.text(
+    "एफ - २, सेक्टर - २, श्रीनगर पोलिस चौकी समोर, श्रीनगर, वागळे इस्टेट, ठाणे - ४०० ६०४.",
+    { align: "center" }
+  );
+
   doc.moveDown();
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  doc.moveDown();
+
+  // ----------- TITLE -----------
+  if (fs.existsSync(boldFont)) doc.font(boldFont);
+
+  doc.fontSize(16).text("Maintenance Bill", { align: "center" });
+
+  doc.moveDown();
+
+  if (fs.existsSync(regularFont)) doc.font(regularFont);
 
   doc.fontSize(12);
   doc.text(`Flat: ${flat}`);
@@ -226,7 +276,6 @@ app.get("/api/report/pdf/:flat/:year/:quarter", (req, res) => {
       doc.text(`Non-Occupancy: ${u.nonOccupancy}`);
       doc.text(`Training: ${u.training}`);
 
-      // ✅ NEW FIELDS IN PDF
       doc.text(`Adjustments: ${u.adjustments}`);
       doc.text(`Adjustment Remark: ${u.adjustmentRemark}`);
       doc.text(`Penalty Charges: ${u.penaltyCharges}`);
