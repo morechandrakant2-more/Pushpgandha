@@ -1,4 +1,4 @@
-/* ---------- BACKGROUND ---------- */
+/* ---------- GLOBAL ---------- */
 body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
@@ -10,59 +10,61 @@ body {
   max-width: 950px;
   margin: 40px auto;
   background: #ffffff;
-  padding: 35px;
-  border-radius: 18px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
 
 /* ---------- HEADER ---------- */
-
 h1 {
-  font-size: 35px;   /* smaller size */
-  color: #000;       /* black color */
-  font-weight: 600;  /* optional: cleaner look */
-  margin: 0;
+  font-size: 30px;
+  color: #000;
+  font-weight: 600;
+  margin-bottom: 15px;
 }
 
 /* ---------- TABS ---------- */
 .tabs {
   display: flex;
-  gap: 12px;
-  margin-bottom: 25px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .tabs button {
   flex: 1;
   padding: 12px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #e9edf5;
   cursor: pointer;
   transition: 0.3s;
+  font-weight: 500;
+}
+
+.tabs button {
+  color: black; /* default text */
 }
 
 .tabs button.active {
   background: linear-gradient(135deg, #4facfe, #00c6ff);
-  color: white;
+  color: black; /* 🔥 change to black */
   font-weight: 600;
 }
 
 /* ---------- INPUTS ---------- */
 input, select {
   width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #bbb;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
   box-sizing: border-box;
-
-  background: #fff;   /* same as textbox */
+  background: #fff;
   color: #333;
 }
 
 input:focus, select:focus {
-  background: #fff;
   border-color: #4facfe;
   box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
   outline: none;
@@ -71,7 +73,7 @@ input:focus, select:focus {
 /* ---------- ROW ---------- */
 .row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .row input,
@@ -81,20 +83,20 @@ input:focus, select:focus {
 
 /* ---------- BUTTON ---------- */
 button {
-  padding: 12px 18px;
-  margin-top: 15px;
+  padding: 10px 16px;
+  margin-top: 12px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #4facfe, #00c6ff);
-  color: white;
+  color: black;
   font-size: 14px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
 }
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ---------- TABLE ---------- */
@@ -104,17 +106,45 @@ table {
   border-collapse: collapse;
   border-radius: 10px;
   overflow: hidden;
+  table-layout: fixed; /* 🔥 FIXES ALIGNMENT */
 }
 
+/* HEADER */
 th {
-  background: #4facfe;
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
   color: white;
   padding: 12px;
+  font-weight: 600;
+  text-align: center;
 }
 
+/* CELLS */
 td {
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+/* COLUMN WIDTHS */
+th:nth-child(1), td:nth-child(1) { width: 30%; text-align: left; padding-left: 15px; }
+th:nth-child(2), td:nth-child(2) { width: 15%; }
+th:nth-child(3), td:nth-child(3) { width: 15%; }
+th:nth-child(4), td:nth-child(4) { width: 20%; }
+th:nth-child(5), td:nth-child(5) { width: 20%; }
+
+/* ROW HOVER */
+tr:hover {
+  background: #f9fbff;
+}
+
+/* PDF BUTTON ALIGN */
+td button {
+  display: block;
+  margin: auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  color: black;
 }
 
 /* ---------- MOBILE ---------- */
@@ -125,5 +155,9 @@ td {
 
   .tabs {
     flex-direction: column;
+  }
+
+  table {
+    font-size: 12px;
   }
 }
