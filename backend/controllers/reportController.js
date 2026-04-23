@@ -4,7 +4,7 @@ const generatePDF = require("../utils/pdfGenerator");
 
 exports.getReport = (req, res) => {
   try {
-    const rows = db.prepare("SELECT * FROM users").all();
+    const rows = db.prepare("SELECT * FROM maintenance").all();
     res.json(rows);
   } catch (err) {
     res.status(500).json(err);
@@ -13,7 +13,7 @@ exports.getReport = (req, res) => {
 
 exports.downloadCSV = (req, res) => {
   try {
-    const rows = db.prepare("SELECT * FROM users").all();
+    const rows = db.prepare("SELECT * FROM maintenance").all();
     const parser = new Parser();
     const csvData = parser.parse(rows);
 

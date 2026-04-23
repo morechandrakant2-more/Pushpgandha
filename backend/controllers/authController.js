@@ -20,7 +20,7 @@ exports.login = (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    res.json({ token: "my-secret-token" });
+    res.json({ token: `${user.id}|${user.user_name}` });
 
   } catch (err) {
     console.error(err);

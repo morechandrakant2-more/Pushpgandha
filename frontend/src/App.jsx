@@ -32,11 +32,29 @@ function App() {
     if (isLoggedIn) fetchData();
   }, [isLoggedIn]);
 
-  const downloadPDF = (flat, year, quarter) => {
-    window.open(
-      `${import.meta.env.VITE_API_URL}/api/report/pdf/${flat}/${year}/${quarter}`
-    );
-  };
+  const downloadPDF = async (flat, year, quarter) => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/report/pdf/${flat}/${year}/${quarter}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  const blob = await res.blob();
+
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `flat_${flat}_${year}_${quarter}.pdf`;
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+};
 
   const logout = () => {
     localStorage.removeItem("token");

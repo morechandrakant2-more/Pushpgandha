@@ -16,9 +16,14 @@ export const addUserAPI = (data, token) =>
     headers: { Authorization: `Bearer ${token}` },
   });
 
-export const uploadFileAPI = (formData, token) =>
-  api.post("/api/upload", formData, {
-    headers: { Authorization: `Bearer ${token}` },
+export const uploadFileAPI = (formData, token) => {
+  return fetch(`${API}/api/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: formData
   });
+};
 
 export default api;

@@ -25,7 +25,7 @@ module.exports = (req, res) => {
 
     case "Q4":
     case "Q4 (JAN-MAR)":
-      return `31/01/${year}`;
+      return `31/01/${year + 1}`;
 
     default:
       return "-";
@@ -160,7 +160,7 @@ if (fs.existsSync(regularFont)) doc.font(regularFont);
 
   try {
     const rows = db.prepare(`
-      SELECT * FROM users
+      SELECT * FROM maintenance
       WHERE flat = ? AND year = ? AND quarter = ?
     `).all(flat, year, quarter);
 
@@ -190,7 +190,7 @@ if (fs.existsSync(regularFont)) doc.font(regularFont);
         timeZone: "Asia/Kolkata",
       });
 
-      doc.text("1", 60, y + 15);
+      doc.text(u.bill_no || "-", 60, y + 15);
       doc.text(todayShort, 160, y + 15);
       doc.text(flat, 310, y + 15);
 

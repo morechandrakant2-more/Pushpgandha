@@ -5,19 +5,31 @@ function Upload({ token, fetchData }) {
   const [file, setFile] = useState(null);
 
   const upload = async () => {
-    if (!file) return alert("Select file");
+  if (!file) return alert("Select file");
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const formData = new FormData();
+  formData.append("file", file);
 
-    try {
-      await uploadFileAPI(formData, token);
-      alert("Uploaded ✅");
-      fetchData();
-    } catch (err) {
-      console.error(err);
+  try {
+    const res = await uploadFileAPI(formData, token);
+
+    // ✅ HANDLE ERROR RESPONSE
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.error);   // 👈 SHOW BACKEND MESSAGE
+      return;
     }
-  };
+
+    const data = await res.json();
+
+    alert("Uploaded ✅");
+    fetchData();
+
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed");
+  }
+};
 
   return (
     <div>

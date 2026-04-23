@@ -29,8 +29,8 @@ function Reports({ data, loading, downloadPDF }) {
           }
         >
           <option value="">All Years</option>
-          <option value="2026">2026</option>
-          <option value="2027">2027</option>
+          <option value="2026-27">2026-27</option>
+          <option value="2027-28">2027-28</option>
         </select>
 
         <select
